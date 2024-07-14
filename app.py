@@ -55,12 +55,10 @@ def main():
     """
     # Set the title and description
     st.title("Perfilamento de escritórios de advocacia")
-    st.write("Faça o upload da planilha e selecione a tabela que deseja perfilar na aba esquerda.")
+    st.write("Faça o upload da planilha e selecione a tabela que deseja perfilar.")
     st.write("A planilha deve estar no formato .xlsx")
 
-    # File upload
-    st.header("Visão da tabela")
-    uploaded_file = st.sidebar.file_uploader("Upload da tabela.", type=['xlsx'])  
+    uploaded_file = st.file_uploader("Upload da tabela.", type=['xlsx'])  
 
     if uploaded_file:
         # Read the uploaded file into a DataFrame
@@ -73,12 +71,12 @@ def main():
         wb = openpyxl.load_workbook(uploaded_file)
 
         ## Show Excel file details
-        st.sidebar.subheader("Detalhes da planilha:")
-        st.sidebar.json(file_details, expanded=False)
-        st.sidebar.markdown("----")
+        st.subheader("Detalhes da planilha:")
+        st.json(file_details, expanded=False)
+        st.markdown("----")
 
         ## Select sheet
-        sheet_selector = st.sidebar.selectbox("Selecione a tabela:", wb.sheetnames)     
+        sheet_selector = st.selectbox("Selecione a tabela:", wb.sheetnames)     
         df = pd.read_excel(uploaded_file, sheet_selector)
         st.markdown(f"### Tabela selecionada: `{sheet_selector}`")
         st.write(df)
