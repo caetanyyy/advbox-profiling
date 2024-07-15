@@ -20,15 +20,21 @@ class Profiling:
 
     """
 
-    def __init__(self, profile):
-        self.profile = profile    
+    def __init__(
+            self, 
+            profile, 
+            weights = {'revenue':1, 'colab':1, 'lawsuit':1}
+        ):
+
+        self.profile = profile
         self.standard_profile = np.nan
         self.final_profile = np.nan
         self.partial_profile = np.nan
+        self.new_profile_rule = np.nan
 
-        self.revenue_weight = 3
-        self.colab_weight = 2
-        self.lawsuit_weight = 2
+        self.revenue_weight = weights['revenue']
+        self.colab_weight = weights['colab']
+        self.lawsuit_weight = weights['lawsuit']
 
         self.map_profile = {
             np.nan:'Sem perfil',
@@ -224,34 +230,68 @@ class Profiling:
         Returns:
             list: A list containing the standard profile, partial profile, and final profile values.
         """
-        revenue = self.revenue()
-        colab = self.colab()
-        lawsuit = self.lawsuit()
+        try:
+            revenue = self.revenue()
+        except:
+            revenue = np.nan
+        
+        try:
+            colab = self.colab()
+        except:
+            colab = np.nan
 
-        self.standard_profile = revenue
+        try:
+            lawsuit = self.lawsuit()
+        except:
+            lawsuit = np.nan
 
-        if (revenue == colab == lawsuit):
-            self.final_profile = self.standard_profile
+        if (revenue is not np.nan) or (colab is not np.nan) or (lawsuit is not np.nan):
 
-        else: 
-            self.partial_profile = self.create_partial_profile()
-            if self.standard_profile is not np.nan and self.partial_profile is not np.nan:
-                self.final_profile = self.conflict_rule()
-            elif self.partial_profile is not np.nan:
-                self.final_profile = self.partial_profile
+            self.standard_profile = revenue
 
-        new_profile_rule = self.new_rule(revenue, colab, lawsuit)
+            if (revenue == colab == lawsuit):
+                self.final_profile = self.standard_profile
 
-        profiles = [revenue, colab, lawsuit, self.standard_profile,  self.partial_profile, self.final_profile, new_profile_rule]
-        profiles = [self.map_profile[profile] for profile in profiles]
-        profiles = {
-            'Revenue profile':profiles[0],
-            'Colab profile':profiles[1],
-            'Lawsuit profile':profiles[2],
-            'Normal':profiles[3],
-            'Parcial':profiles[4], 
-            'Final':profiles[5], 
-            'Nova':profiles[6]
-        }
+            else: 
+                self.partial_profile = self.create_partial_profile()
+
+                if (self.standard_profile is not np.nan) and (self.partial_profile is not np.nan):
+                    if self.standard_profile <= self.partial_profile:
+                        self.final_profile = self.partial_profile
+                    else:
+                        self.final_profile = self.conflict_rule()
+
+                elif (self.standard_profile is np.nan) and (self.partial_profile is not np.nan):
+                    self.final_profile = self.partial_profile
+                
+                else:
+                    self.final_profile = np.nan
+            try:
+                self.new_profile_rule = self.new_rule(revenue, colab, lawsuit)
+            except:
+                pass
+
+            profiles = [revenue, colab, lawsuit, self.partial_profile, self.final_profile, self.new_profile_rule]
+
+            profiles = [self.map_profile[profile] for profile in profiles]
+
+            profiles = {
+                'Revenue profile':profiles[0],
+                'Colab profile':profiles[1],
+                'Lawsuit profile':profiles[2],
+                'Parcial':profiles[3], 
+                'Final':profiles[4], 
+                'Nova':profiles[5]
+            }
+        
+        else:
+            profiles = {
+                'Revenue profile':'Sem perfil',
+                'Colab profile':'Sem perfil',
+                'Lawsuit profile':'Sem perfil',
+                'Parcial':'Sem perfil', 
+                'Final':'Sem perfil', 
+                'Nova':'Sem perfil'
+            }
 
         return profiles
