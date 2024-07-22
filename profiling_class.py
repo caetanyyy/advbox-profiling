@@ -17,13 +17,12 @@ class Profiling:
         create_partial_profile: Creates the partial profile based on the profile's colab and lawsuit attributes.
         conflict_rule: Determines the conflict rule based on the partial profile and standard profile values.
         create_profile: Creates the final profile based on the revenue, colab, lawsuit, partial profile, and conflict rule.
-
     """
 
     def __init__(
             self, 
             profile, 
-            weights = {'revenue':1, 'colab':1, 'lawsuit':1}
+            weights = {'lawsuit': 1, 'colab': 1, 'revenue': 1}
         ):
 
         self.profile = profile
@@ -211,17 +210,13 @@ class Profiling:
         if np.isnan(lawsuit):
             lawsuit = 0
             self.lawsuit_weight = 0
-        
-        weighted_mean = np.average(
-            [revenue, colab, lawsuit], 
-            weights = [self.revenue_weight, self.colab_weight, self.lawsuit_weight]
-        )
-        
+
+        weighted_mean = (
+            revenue*self.revenue_weight + colab*self.colab_weight + lawsuit*self.lawsuit_weight
+            ) / (self.revenue_weight + self.colab_weight + self.lawsuit_weight)
         weighted_mean = int(weighted_mean)
-        
-        if weighted_mean == 0:
-            weighted_mean = 1
-        return round(weighted_mean)
+
+        return weighted_mean
     
     def create_profile(self):
         """
