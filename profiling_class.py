@@ -217,9 +217,9 @@ class Profiling:
             ) / (self.revenue_weight + self.colab_weight + self.lawsuit_weight)
         weighted_mean = int(math.ceil(weighted_mean))
 
-        if weighted_mean > 6:
+        if weighted_mean > 5:
             weighted_mean = 5
-            
+
         return weighted_mean
     
     def create_profile(self):
