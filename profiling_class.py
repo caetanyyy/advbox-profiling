@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class Profiling:
     """
@@ -214,8 +215,11 @@ class Profiling:
         weighted_mean = (
             revenue*self.revenue_weight + colab*self.colab_weight + lawsuit*self.lawsuit_weight
             ) / (self.revenue_weight + self.colab_weight + self.lawsuit_weight)
-        weighted_mean = int(weighted_mean)
+        weighted_mean = int(math.ceil(weighted_mean))
 
+        if weighted_mean > 6:
+            weighted_mean = 5
+            
         return weighted_mean
     
     def create_profile(self):
